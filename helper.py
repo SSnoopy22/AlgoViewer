@@ -1,3 +1,30 @@
+import os
+
+
+class FileParser:
+    def __init__(self, arg):
+        self.arg = arg
+        self.file_path = self.find_file()
+
+    def find_file(self):
+        # If it's an absolute or relative valid path
+        if os.path.isfile(self.arg):
+            return os.path.abspath(self.arg)
+        
+        # Extract just the filename
+        filename = os.path.basename(self.arg)
+
+        # Walk the filesystem starting from current directory
+        for root, _, files in os.walk('.'):
+            if filename in files:
+                return os.path.join(root, filename)
+        
+        raise FileNotFoundError(f"File '{filename}' not found in the current directory or its subdirectories.")
+
+    def parse_file(self):
+        with open(self.file_path, 'r', encoding='utf-8') as file:
+            return file.read()
+
 class Node():
     def __init__(self, state, parent, action):
         self.state = state

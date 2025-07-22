@@ -1,16 +1,23 @@
 import copy
 
 class Maze():
-    def __init__(self, filename):
-        with open (filename, 'r') as f:
-            self.maze = [list(line.strip()) for line in f.readlines()]
-        with open (filename, 'r') as f:
-            contents = f.read()
-            # print(contents.count('A'), contents.count('B'))
-            if contents.count('A') != 1:
-                raise ValueError("Maze must contain exactly one 'A' (start position)") 
-            if contents.count('B') != 1:
-                raise ValueError("Maze must contain exactly one 'B' (end position)")
+    # def __init__(self, filename):
+    #     with open (filename, 'r') as f:
+    #         self.maze = [list(line.strip()) for line in f.readlines()]
+    #     with open (filename, 'r') as f:
+    #         contents = f.read()
+    #         # print(contents.count('A'), contents.count('B'))
+    #         if contents.count('A') != 1:
+    #             raise ValueError("Maze must contain exactly one 'A' (start position)") 
+    #         if contents.count('B') != 1:
+    #             raise ValueError("Maze must contain exactly one 'B' (end position)")
+    def __init__(self, mazeText):
+        self.maze = [list(mazeLine.strip()) for mazeLine in mazeText.splitlines()]
+        # print(contents.count('A'), contents.count('B'))
+        if mazeText.count('A') != 1:
+            raise ValueError("Maze must contain exactly one 'A' (start position)") 
+        if mazeText.count('B') != 1:
+            raise ValueError("Maze must contain exactly one 'B' (end position)")
         self.wall = "#"
         self.path = "_"
         self.explored = "X"
