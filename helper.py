@@ -10,36 +10,39 @@ class FileParser:
         # If it's an absolute or relative valid path
         if os.path.isfile(self.arg):
             return os.path.abspath(self.arg)
-        
+
         # Extract just the filename
         filename = os.path.basename(self.arg)
 
         # Walk the filesystem starting from current directory
-        for root, _, files in os.walk('.'):
+        for root, _, files in os.walk("."):
             if filename in files:
                 return os.path.join(root, filename)
-        
-        raise FileNotFoundError(f"File '{filename}' not found in the current directory or its subdirectories.")
+
+        raise FileNotFoundError(
+            f"File '{filename}' not found in the current directory or its subdirectories."
+        )
 
     def parse_file(self):
-        with open(self.file_path, 'r', encoding='utf-8') as file:
+        with open(self.file_path, "r", encoding="utf-8") as file:
             return file.read()
 
-class Node():
+
+class Node:
     def __init__(self, state, parent, action):
         self.state = state
         self.parent = parent
         self.action = action
 
 
-class StackFrontier():
+class StackFrontier:
     def __init__(self):
         self.frontier = []
-    
+
     def add(self, state):
         """Adds a state to the frontier."""
         self.frontier.append(state)
-    
+
     def contains_state(self, state):
         """Checks if the frontier contains a state."""
         return any(node.state == state for node in self.frontier)

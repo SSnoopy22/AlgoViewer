@@ -3,20 +3,22 @@ import copy
 
 """
 TODO Fill extra maze space with wall. Basically add walls accounting for max height/width.
-TODO Convert isDebug to an inherited class variable
-TODO Remove isDebug from the constructor and use a class variable instead
+    - Differing widths resolved.
+    - Different heights doesn't work correctly. 
+    - The maze filler will add walls to the left side and push all items to the left.
+TODO Replace COLOR contants with values from .env
 """
 
 
-class Maze():
-    def __init__(self, mazeText):
+class Maze:
+    def __init__(self, mazeText, isDebug):
         # Parse the maze from a multiline string into a 2D list of characters
         self.maze = [list(mazeLine.strip()) for mazeLine in mazeText.splitlines()]
-        
+
         # Validate that maze has exactly one start 'A' and one goal 'B'
-        if mazeText.count('A') != 1:
-            raise ValueError("Maze must contain exactly one 'A' (start position)") 
-        if mazeText.count('B') != 1:
+        if mazeText.count("A") != 1:
+            raise ValueError("Maze must contain exactly one 'A' (start position)")
+        if mazeText.count("B") != 1:
             raise ValueError("Maze must contain exactly one 'B' (end position)")
 
         # Define maze element types
@@ -25,6 +27,7 @@ class Maze():
         self.path = "_"
         self.goal = "B"
         self.explored = "X"
+        self.isDebug = isDebug
 
         # Precompute useful properties
         self.goalPosition = self.getEndPosition()
@@ -33,8 +36,15 @@ class Maze():
         self.maxWidth = max(len(row) for row in self.maze)
 
         self.fillMaze()
-        print("Maze initialized with dimensions: height=", self.height, "width=", self.width, "max width", self.maxWidth)    
-
+        if self.isDebug:
+            print(
+                "Maze initialized with dimensions: height=",
+                self.height,
+                "width=",
+                self.width,
+                "max width",
+                self.maxWidth,
+            )
 
     def movePlayer(self, mazeState, direction, marked=False):
         """
@@ -43,7 +53,7 @@ class Maze():
         if direction not in ["up", "down", "left", "right"]:
             raise ValueError("Invalid direction. Use 'up', 'down', 'left', or 'right'.")
 
-        new_position = mazeState 
+        new_position = mazeState
         if direction == "up":
             new_position = (mazeState[0] - 1, mazeState[1])
         elif direction == "down":
@@ -54,50 +64,51 @@ class Maze():
             new_position = (mazeState[0], mazeState[1] + 1)
 
         return new_position
-    
-    
-    def getActions(self, mazeState, isDebug=False):
+
+    def getActions(self, mazeState):
         """
         Returns a dictionary of valid move directions from the current mazeState.
         If isDebug is True, prints debugging information.
         """
         moveOptions = {}
-        notExplorable = [self.wall, 'A']  # Cells that cannot be entered
+        notExplorable = [self.wall, "A"]  # Cells that cannot be entered
 
-        if isDebug:
+        if self.isDebug:
             print("\nNew Turn:")
             print("Current Player Position:", mazeState)
             print("Current Maze State:")
             self.printMaze(mazeState)
 
         # Check movement in each direction and whether it's allowed
-        if mazeState[0] > 0 :
-            if isDebug: print("up:", self.maze[mazeState[0] - 1][mazeState[1]])
+        if mazeState[0] > 0:
+            if self.isDebug:
+                print("up:", self.maze[mazeState[0] - 1][mazeState[1]])
             if self.maze[mazeState[0] - 1][mazeState[1]] not in notExplorable:
                 moveOptions["up"] = True
 
         if mazeState[0] < self.height - 1:
-            if isDebug: 
+            if self.isDebug:
                 print("down:", self.maze[mazeState[0] + 1][mazeState[1]])
             if self.maze[mazeState[0] + 1][mazeState[1]] not in notExplorable:
                 moveOptions["down"] = True
 
         if mazeState[1] > 0:
-            if isDebug: print("left:", self.maze[mazeState[0]][mazeState[1] - 1])
+            if self.isDebug:
+                print("left:", self.maze[mazeState[0]][mazeState[1] - 1])
             if self.maze[mazeState[0]][mazeState[1] - 1] not in notExplorable:
                 moveOptions["left"] = True
 
         # BUG: Incorrect index for width checking; should use self.width instead of len(row)
-        if mazeState[1] < len(self.maze[mazeState[0]])-1:
-            if isDebug: print("right:", self.maze[mazeState[0]][mazeState[1] + 1])
+        if mazeState[1] < len(self.maze[mazeState[0]]) - 1:
+            if self.isDebug:
+                print("right:", self.maze[mazeState[0]][mazeState[1] + 1])
             if self.maze[mazeState[0]][mazeState[1] + 1] not in notExplorable:
                 moveOptions["right"] = True
 
-        if isDebug:
+        if self.isDebug:
             print("Available Actions:", moveOptions)
 
         return moveOptions
-
 
     def getPlayerPosition(self, mazeState):
         """
@@ -106,10 +117,9 @@ class Maze():
         """
         for i, row in enumerate(mazeState):
             for j, cell in enumerate(row):
-                if cell == 'A':
+                if cell == "A":
                     return (i, j)
-        return None    
-
+        return None
 
     def getEndPosition(self):
         """
@@ -122,13 +132,11 @@ class Maze():
                     return (i, j)
         return None
 
-
     def getInitialState(self):
         """
         Returns the starting position of the hero 'A' in the original maze.
         """
         return self.getPlayerPosition(self.maze)
-
 
     def isAtGoal(self, mazeState):
         """
@@ -137,7 +145,6 @@ class Maze():
         # TODO: Move this debug print to a controlled debug flag
         if mazeState == self.goalPosition:
             return True
-
 
     def fillMaze(self):
         """
@@ -160,12 +167,13 @@ class Maze():
         for y, x in fillPoints:
             # Ensure the row is long enough
             while len(self.maze[y]) <= x:
-                self.maze[y].append(self.wall)  # fill with underscore (or your chosen char)
+                self.maze[y].append(
+                    self.wall
+                )  # fill with underscore (or your chosen char)
             # Now set the specific cell to the fill value
             self.maze[y][x] = self.wall
 
-
-    def printMaze(self, mazeState=None, isSpecial=False, isDebug=False, solved=False):
+    def printMaze(self, mazeState=None, isSpecial=False, solved=False):
         """
         Prints the maze to the terminal with optional styling for special/debug/solved views.
         Replaces the current position of the player with 'A'.
@@ -174,17 +182,17 @@ class Maze():
         COLOR = "\033[92m"
         COLOR_2 = "\033[94m"
         COLOR_SOLVED = "\033[93m"
-        END = '\033[0m'
-        
-        seperator = "+" + "-" * self.maxWidth * 2 + "+"
+        END = "\033[0m"
+
+        seperator ="+" + "-" * self.maxWidth * 2 + "+"
         if isSpecial:
             print(COLOR + seperator)
-        elif isDebug:
+        elif self.isDebug:
             print(COLOR_2 + seperator)
         elif solved:
             print(COLOR_SOLVED + seperator)
-        else:   
-            print(seperator)
+        else:
+            print(END + seperator)
 
         # Create a copy so original maze isn't modified
         newMaze = copy.deepcopy(self.maze)
@@ -194,11 +202,10 @@ class Maze():
         newMaze[mazeState[0]][mazeState[1]] = "A"
 
         for row in self.maze:
-            print("|", ' '.join(row), "|")
+            print("|", " ".join(row), "|")
         print(seperator + END)
 
-
-    def printMarkedMaze(self, state, specialOne = False, specialTwo = False):
+    def printMarkedMaze(self, state, specialOne=False, specialTwo=False):
         """
         Prints a maze with the state position marked with a colored border.
         """
@@ -209,11 +216,11 @@ class Maze():
             color = COLOR_ONE
         elif specialTwo:
             color = COLOR_TWO
-        END = '\033[0m'
+        END = "\033[0m"
         seperator = color + "+" + "-" * self.maxWidth * 2 + "+"
         print(seperator)
         for row in self.maze:
-            print("|", ' '.join(row), "|")
+            print("|", " ".join(row), "|")
         print(seperator + END)
 
     # TODO FINISH THIS
@@ -222,13 +229,12 @@ class Maze():
         Prints a solved or explored maze with a yellow border.
         """
         COLOR_SOLVED = "\033[93m"
-        END = '\033[0m'
+        END = "\033[0m"
         seperator = COLOR_SOLVED + "+" + "-" * self.maxWidth * 2 + "+"
         print(seperator)
         for row in theMaze:
-            print("|", ' '.join(row), "|")
+            print("|", " ".join(row), "|")
         print(seperator + END)
-    
 
     def markExplored(self, cells):
         """

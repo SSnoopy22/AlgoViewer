@@ -1,6 +1,7 @@
 import sys
 from pathAlgos import bfs, dfs
 from helper import FileParser
+from mazeController import Maze
 
 """
 Main script to run pathfinding algorithms on a maze file.
@@ -11,7 +12,12 @@ Usage:
 Arguments:
     maze_file : str  - Path to the maze file (required)
     debug     : bool - Optional flag: 1 = debug mode ON, 0 or missing = OFF
+
+TODO set run_solve to take arg vals.
+TODO set args to use '-' instead of positional args
 """
+
+
 
 def parse_args(args):
     """
@@ -25,10 +31,12 @@ def parse_args(args):
     is_debug = debug_flag == "1"
     return maze_file, is_debug
 
+
 def run_solver(SolverClass, maze_text, is_debug, label):
-    print(f"\n{'='*30} {label} Solver {'='*30}")
+    # print(f"\n{'='*30} {label} Solver {'='*30}")
     solver = SolverClass(maze_text, isDebug=is_debug)
     solver.solve()
+
 
 def main():
     maze_file, is_debug = parse_args(sys.argv)
@@ -42,10 +50,12 @@ def main():
         sys.exit(1)
 
     print(f"Debug Mode: {'ON' if is_debug else 'OFF'}")
+    maze = Maze(mazeText=maze_text, isDebug=is_debug)
 
     # Run Solvers
-    run_solver(bfs, maze_text, is_debug, "BFS")
-    run_solver(dfs, maze_text, is_debug, "DFS")
+    run_solver(bfs, maze, is_debug, "BFS")
+    run_solver(dfs, maze, is_debug, "DFS")
+
 
 if __name__ == "__main__":
     main()
