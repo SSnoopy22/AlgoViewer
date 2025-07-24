@@ -213,7 +213,13 @@ If you’d like, open an Issue and I’ll help scaffold the code.
 
 Pulled from in‑code comments and discussion:
 
--
+### PathAlgos
+- Convert self.maze to take in a maze object instead of a file path so the maze can be a different type of object with the same function names
+- Explored States and Frontier does not mark position on map.
+
+### MazeController
+- Convert isDebug to an inherited class variable for mazeController class.
+- Remove isDebug from the constructor and use a class variable instead
 
 ---
 
